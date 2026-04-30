@@ -1,0 +1,10 @@
+
+[dev]
+pytest<10,>=9
+textual<7,>=6
+
+[runtime]
+argostranslate<2,>=1.11
+
+[tui]
+textual<7,>=6

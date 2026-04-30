@@ -33,7 +33,8 @@ class ModelsView(Vertical):
         """挂载后初始化"""
         table = self.query_one("#models-table", DataTable)
         table.add_columns("Language Pair", "Status", "Size")
-        self._refresh_models()
+        # 延迟加载模型状态，避免阻塞启动
+        self.set_timer(0.5, self._refresh_models)
 
     def _refresh_models(self) -> None:
         """刷新模型状态"""
@@ -67,20 +68,22 @@ class ModelsView(Vertical):
         self.run_worker(
             self._do_install_models,
             thread=True,
-            callback=self._on_install_complete,
+            name="install-models",
         )
 
     def _do_install_models(self) -> None:
         """后台安装模型"""
         install_default_models(self.state.translator)
 
-    def _on_install_complete(self, result: object) -> None:
-        """安装完成回调"""
-        if isinstance(result, Exception):
-            self.app.notify(str(result), severity="error")
-        else:
+    def on_worker_state_changed(self, event) -> None:
+        """Worker 状态变化处理"""
+        if event.worker.name != "install-models":
+            return
+        if event.state == "success":
             self._refresh_models()
             self.app.notify("Models installed", severity="information")
+        elif event.state == "error":
+            self.app.notify(str(event.worker.error), severity="error")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """按钮点击处理"""

@@ -40,16 +40,16 @@ def main(
             stdout.write("Installed zh <-> en models.\n")
             return 0
 
-        if args.tui:
+        if args.text:
+            stdout.write(translator.translate(args.text, args.from_lang, args.to_lang) + "\n")
+            return 0
+
+        if args.tui or sys.stdin.isatty():
             if tui_runner is None:
                 from trans_cli.tui.app import run_tui
 
                 tui_runner = run_tui
             return tui_runner(translator)
-
-        if args.text:
-            stdout.write(translator.translate(args.text, args.from_lang, args.to_lang) + "\n")
-            return 0
 
         return run_repl(translator, args.from_lang, args.to_lang, sys.stdin, stdout)
     except KeyboardInterrupt:

@@ -99,12 +99,9 @@ class TranslateView(Vertical):
 
         # 在后台线程执行翻译
         self.run_worker(
-            self._do_translate,
-            text,
-            from_code,
-            to_code,
+            lambda: self._do_translate(text, from_code, to_code),
             thread=True,
-            callback=self._on_translate_complete,
+            name="translate",
         )
 
     def _do_translate(self, text: str, from_code: str, to_code: str) -> str:
@@ -117,6 +114,16 @@ class TranslateView(Vertical):
             return self.state.translator.translate(text, from_code, to_code)
         except (DependencyMissingError, ModelMissingError, TranslationRuntimeError) as exc:
             raise TranslationError(str(exc)) from exc
+
+    def on_worker_state_changed(self, event) -> None:
+        """Worker 状态变化处理"""
+        if event.worker.name != "translate":
+            return
+        if event.state == "success":
+            self._on_translate_complete(event.worker.result)
+        elif event.state == "error":
+            self.state.translation_in_progress = False
+            self.app.notify(str(event.worker.error), severity="error")
 
     def _on_translate_complete(self, result: str | Exception) -> None:
         """翻译完成回调"""

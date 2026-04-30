@@ -1,0 +1,2 @@
+[console_scripts]
+trans = trans_cli.cli:main

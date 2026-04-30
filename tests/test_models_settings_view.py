@@ -82,7 +82,8 @@ async def test_models_view_refresh(mock_get_statuses):
 
     async with ModelsViewApp(state).run_test() as pilot:
         table = pilot.app.query_one("#models-table")
-        await pilot.pause()
+        # 等待延迟加载完成
+        await pilot.pause(1.0)
 
         # 应有两行数据
         assert table.row_count == 2
@@ -105,7 +106,10 @@ async def test_models_view_install(mock_get_statuses, mock_install):
 
     async with ModelsViewApp(state).run_test() as pilot:
         view = pilot.app.query_one(ModelsView)
+        # 等待延迟加载完成
+        await pilot.pause(1.0)
         view.action_install_models()
+        await pilot.pause(0.5)
         mock_install.assert_called_once()
 
 
@@ -123,7 +127,8 @@ async def test_models_view_status_display(mock_get_statuses):
 
     async with ModelsViewApp(state).run_test() as pilot:
         table = pilot.app.query_one("#models-table")
-        await pilot.pause()
+        # 等待延迟加载完成
+        await pilot.pause(1.0)
 
         assert table.row_count == 2
 
