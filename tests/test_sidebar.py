@@ -49,3 +49,22 @@ async def test_sidebar_highlight():
         history_btn = sidebar.query_one("#nav-history", NavButton)
         assert "nav-active" in history_btn.classes
         assert "nav-active" not in translate_btn.classes
+
+
+@pytest.mark.asyncio
+async def test_sidebar_no_bindings():
+    """测试 Sidebar 没有独立的键绑定（导航通过 app 层处理）"""
+    sidebar = Sidebar()
+    assert not hasattr(sidebar, "BINDINGS") or not sidebar.BINDINGS
+
+
+def test_nav_items_structure():
+    """测试 NAV_ITEMS 每项只有 3 个元素（icon, page, label）"""
+    from trans_cli.tui.widgets.sidebar import NAV_ITEMS
+
+    for item in NAV_ITEMS:
+        assert len(item) == 3, f"NAV_ITEMS 每项应为 3 元组，实际为 {len(item)} 元组: {item}"
+        icon, page, label = item
+        assert isinstance(icon, str)
+        assert isinstance(page, Page)
+        assert isinstance(label, str)
