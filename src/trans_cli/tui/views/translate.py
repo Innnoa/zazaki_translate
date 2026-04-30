@@ -106,14 +106,9 @@ class TranslateView(Vertical):
         self.state.translation_in_progress = True
         self._update_status("⟳ Translating...", "status-translating")
 
-        # 自动检测语言
-        from_code = self.state.from_code
-        to_code = self.state.to_code
-
-        if not from_code:
-            from_code = "zh" if any("\u4e00" <= ch <= "\u9fff" for ch in text) else "en"
-        if not to_code:
-            to_code = "en" if from_code == "zh" else "zh"
+        # 自动检测语言（始终自动检测，忽略配置的固定方向）
+        from_code = "zh" if any("\u4e00" <= ch <= "\u9fff" for ch in text) else "en"
+        to_code = "en" if from_code == "zh" else "zh"
 
         # 保存检测到的语言代码供历史记录使用
         self._pending_from_code = from_code
