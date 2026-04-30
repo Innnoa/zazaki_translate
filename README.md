@@ -1,132 +1,134 @@
-# trans
+# Trans
 
-适用于 `WSL / Linux` 的离线中英命令行翻译。
+Offline Chinese-English command-line translator with modern TUI interface.
 
-## 功能
+## Features
 
-- 默认交互模式
-- 支持 `中文 -> 英文`、`英文 -> 中文`
-- 默认自动识别中英
-- 支持 `-f`、`-t` 强制指定方向
-- 首次下载模型，之后离线运行
+- Fast offline translation using Argos Translate
+- Modern TUI interface with Catppuccin themes
+- Vim-style keyboard navigation
+- Translation history with search
+- Easy model management
 
-## 安装
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install --no-build-isolation -e '.[runtime]'
-```
-
-如果你也要跑测试：
+## Installation
 
 ```bash
-pip install --no-build-isolation -e '.[dev]'
+pip install -e '.[tui,runtime]'
 ```
 
-如果你要使用 TUI：
+> **Note:** Argos Translate runtime pulls large dependencies (e.g. `torch`). First install may take a while.
 
-```bash
-pip install --no-build-isolation -e '.[runtime,tui]'
-```
-
-## 说明
-
-`Argos Translate` 的运行时依赖会比较大，首次安装可能会拉取 `torch` 等包，耗时和体积都明显高于普通 CLI 工具。
-
-## 初始化模型
+### Initialize models
 
 ```bash
 trans --install-models
 ```
 
-这一步会下载：
+Downloads `zh -> en` and `en -> zh` models. After that, everything works offline.
 
-- `zh -> en`
-- `en -> zh`
+## Usage
 
-下载完成后，就可以离线使用。
-
-## 用法
-
-进入交互模式：
-
-```bash
-trans
-```
-
-进入 TUI：
+### TUI Mode
 
 ```bash
 trans --tui
 ```
 
-一次性翻译：
+### CLI Mode
 
 ```bash
+# Interactive mode
+trans
+
+# One-shot translation
+trans "Hello world"
 trans "你好，今天怎么样？"
-trans "How are you today?"
+
+# Force direction
+trans -f en -t zh "Hello"
+trans -f zh -t en "你好"
 ```
 
-强制方向：
+### Interactive Commands
+
+| Command | Description |
+|---------|-------------|
+| `:q` | Quit |
+| `:swap` | Swap `zh -> en` / `en -> zh` |
+| `:from zh` | Set source language |
+| `:to en` | Set target language |
+| `:auto` | Return to auto-detect |
+
+## Keyboard Shortcuts
+
+### Global
+
+| Key | Action |
+|-----|--------|
+| `h` / `l` | Previous / Next page |
+| `j` / `k` | Focus down / up |
+| `Ctrl+P` | Command palette |
+| `q` | Quit |
+
+### Translate Page
+
+| Key | Action |
+|-----|--------|
+| `Ctrl+Enter` | Translate |
+| `s` | Swap language direction |
+| `c` | Clear input |
+| `y` | Copy output |
+| `Tab` | Toggle focus between input/output |
+
+### History Page
+
+| Key | Action |
+|-----|--------|
+| `/` | Search |
+| `r` | Refresh |
+
+### Models Page
+
+| Key | Action |
+|-----|--------|
+| `r` | Refresh |
+| `i` | Install models |
+
+### Settings Page
+
+| Key | Action |
+|-----|--------|
+| `s` | Save settings |
+
+## Themes
+
+Supports all Catppuccin flavors:
+
+- **Latte** (light)
+- **Frappe** (medium)
+- **Macchiato** (dark)
+- **Mocha** (darkest, default)
+
+Switch themes via the Settings page or the command palette.
+
+## Configuration
+
+Config file: `~/.config/trans/config.toml`
+History file: `~/.local/state/trans/history.jsonl`
+
+## Development
 
 ```bash
-trans -f zh -t en
-trans -f en -t zh "hello"
+# Install dev dependencies
+pip install -e '.[dev]'
+
+# Run tests
+pytest
+
+# Run with coverage
+pytest --cov=trans_cli
 ```
 
-## 交互命令
+## License
 
-- `:q` 退出
-- `:swap` 切换 `zh -> en` 和 `en -> zh`
-- `:from zh` 指定源语言
-- `:to en` 指定目标语言
-- `:auto` 回到自动识别
-
-## TUI
-
-`trans --tui` 使用 `Textual` 实现，默认使用 `Catppuccin Mocha` 配色，并内置 `Latte / Frappe / Macchiato / Mocha` 四套官方 palette。
-
-第一版 TUI 包含：
-
-- `Translate`：输入、输出、方向切换、翻译
-- `History`：本地历史记录与搜索
-- `Models`：查看 `zh -> en` / `en -> zh` 模型状态，触发模型安装
-- `Settings`：主题、默认方向、历史开关、启动页配置
-
-TUI 支持类 Vim normal-mode 控制：
-
-- `h` / `l`：切换到上一个 / 下一个页面
-- `j` / `k`：焦点下移 / 上移
-- `i`：聚焦当前页面的输入框
-- `Esc`：回到 normal mode
-- `Enter`：执行当前页面主动作；在 `Translate` 页执行翻译
-- `r`：刷新当前页面
-- `s`：交换翻译方向
-- `c`：清空输入和输出
-- `y`：复制提示
-- `q`：退出
-
-本地配置默认路径：
-
-```bash
-~/.config/trans/config.toml
-```
-
-本地历史默认路径：
-
-```bash
-~/.local/state/trans/history.jsonl
-```
-
-Arch / zsh 下安装时注意给 extras 加引号：
-
-```bash
-pip install --no-build-isolation -e '.[runtime,tui]'
-```
-
-## 不安装 console script 时的直接运行方式
-
-```bash
-PYTHONPATH=src python -m trans_cli.cli
-```
+MIT
