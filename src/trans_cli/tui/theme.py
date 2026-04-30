@@ -291,4 +291,23 @@ Screen {{
 .error {{
     color: {palette["red"]};
 }}
+
+/* 翻译状态 */
+.translate-status {{
+    color: {palette["subtext0"]};
+    margin-top: 1;
+    height: 1;
+}}
+
+.status-translating {{
+    color: {palette["yellow"]};
+}}
+
+.status-success {{
+    color: {palette["green"]};
+}}
+
+.status-error {{
+    color: {palette["red"]};
+}}
 """

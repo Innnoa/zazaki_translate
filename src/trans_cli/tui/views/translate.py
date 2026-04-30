@@ -48,6 +48,7 @@ class TranslateView(Vertical):
             with Vertical(classes="output-panel"):
                 yield Label("Translation", classes="panel-title")
                 yield RichLog(id="translation-output", highlight=True)
+                yield Label("", id="translate-status", classes="translate-status")
         with Horizontal(classes="translate-actions"):
             yield Button(
                 f"{self.state.from_code or 'auto'}→{self.state.to_code or 'auto'}",
@@ -84,6 +85,13 @@ class TranslateView(Vertical):
         to_code = self.state.to_code or "auto"
         direction_btn.label = f"{from_code}→{to_code}"
 
+    def _update_status(self, text: str, style: str = "") -> None:
+        """更新翻译状态"""
+        status_label = self.query_one("#translate-status", Label)
+        status_label.update(text)
+        if style:
+            status_label.set_classes(f"translate-status {style}")
+
     def action_translate(self) -> None:
         """执行翻译"""
         if self.state.translation_in_progress:
@@ -96,7 +104,7 @@ class TranslateView(Vertical):
             return
 
         self.state.translation_in_progress = True
-        self.app.notify("Translating...", severity="information")
+        self._update_status("⟳ Translating...", "status-translating")
 
         # 自动检测语言
         from_code = self.state.from_code
@@ -137,6 +145,7 @@ class TranslateView(Vertical):
             self._on_translate_complete(event.worker.result)
         elif event.state == "error":
             self.state.translation_in_progress = False
+            self._update_status("✗ Translation failed", "status-error")
             self.app.notify(str(event.worker.error), severity="error")
 
     def _on_translate_complete(self, result: str | Exception) -> None:
@@ -144,6 +153,7 @@ class TranslateView(Vertical):
         self.state.translation_in_progress = False
 
         if isinstance(result, Exception):
+            self._update_status("✗ Translation failed", "status-error")
             self.app.notify(str(result), severity="error")
             return
 
@@ -153,6 +163,7 @@ class TranslateView(Vertical):
         output_widget.write(result)
 
         self.state.last_output = result
+        self._update_status("✓ Translated", "status-success")
 
         # 保存历史
         self._save_history(
