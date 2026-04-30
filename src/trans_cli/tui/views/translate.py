@@ -32,6 +32,7 @@ class TranslateView(Vertical):
         Binding("c", "clear_input", "Clear", show=True),
         Binding("y", "copy_output", "Copy", show=True),
         Binding("tab", "toggle_focus", "Tab", show=True),
+        Binding("escape", "blur", "Esc", show=False),
     ]
 
     def __init__(self, state: AppState, **kwargs) -> None:
@@ -205,3 +206,7 @@ class TranslateView(Vertical):
             self.query_one("#translation-output", RichLog).focus()
         else:
             input_widget.focus()
+
+    def action_blur(self) -> None:
+        """取消焦点，退出输入模式"""
+        self.screen.focus(None)

@@ -18,6 +18,7 @@ class HistoryView(Vertical):
     BINDINGS = [
         Binding("/", "search_history", "Search", show=True),
         Binding("r", "refresh_history", "Refresh", show=True),
+        Binding("escape", "blur", "Esc", show=False),
     ]
 
     def __init__(self, state: AppState, **kwargs) -> None:
@@ -60,3 +61,7 @@ class HistoryView(Vertical):
         search_input = self.query_one("#history-search", Input)
         self._load_history(search_input.value.strip())
         self.app.notify("History refreshed", severity="information")
+
+    def action_blur(self) -> None:
+        """取消焦点，退出输入模式"""
+        self.screen.focus(None)
