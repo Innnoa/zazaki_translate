@@ -21,8 +21,8 @@ class Command:
     action: Callable
 
 
-# 默认命令列表
-DEFAULT_COMMANDS = [
+# 默认命令列表（不可变）
+DEFAULT_COMMANDS = (
     Command("translate", "Go to Translate", "T", lambda app: app.action_show_page("translate")),
     Command("history", "Go to History", "H", lambda app: app.action_show_page("history")),
     Command("models", "Go to Models", "M", lambda app: app.action_show_page("models")),
@@ -33,7 +33,7 @@ DEFAULT_COMMANDS = [
     Command("theme frappe", "Switch to Frappe Theme", "", lambda app: app.action_set_theme("frappe")),
     Command("theme macchiato", "Switch to Macchiato Theme", "", lambda app: app.action_set_theme("macchiato")),
     Command("theme mocha", "Switch to Mocha Theme", "", lambda app: app.action_set_theme("mocha")),
-]
+)
 
 
 class CommandPalette(ModalScreen[Command | None]):
@@ -47,9 +47,8 @@ class CommandPalette(ModalScreen[Command | None]):
 
     def __init__(self, commands: list[Command] | None = None, **kwargs) -> None:
         super().__init__(**kwargs)
-        self.commands = commands or DEFAULT_COMMANDS
+        self.commands = list(commands) if commands is not None else list(DEFAULT_COMMANDS)
         self.filtered_commands = self.commands
-        self.selected_index = 0
 
     def compose(self) -> ComposeResult:
         """组合组件"""
@@ -81,7 +80,6 @@ class CommandPalette(ModalScreen[Command | None]):
             )
             list_view.append(item)
 
-        self.selected_index = 0
         if self.filtered_commands:
             list_view.index = 0
 
@@ -98,21 +96,25 @@ class CommandPalette(ModalScreen[Command | None]):
     def action_cursor_up(self) -> None:
         """上移光标"""
         list_view = self.query_one("#command-list", ListView)
+        if not self.filtered_commands or list_view.index is None:
+            return
         if list_view.index > 0:
             list_view.index -= 1
-            self.selected_index = list_view.index
 
     def action_cursor_down(self) -> None:
         """下移光标"""
         list_view = self.query_one("#command-list", ListView)
+        if not self.filtered_commands or list_view.index is None:
+            return
         if list_view.index < len(self.filtered_commands) - 1:
             list_view.index += 1
-            self.selected_index = list_view.index
 
     def _select_command(self) -> None:
         """选择当前高亮命令"""
-        if self.filtered_commands:
-            command = self.filtered_commands[self.selected_index]
+        list_view = self.query_one("#command-list", ListView)
+        index = list_view.index
+        if self.filtered_commands and index is not None and 0 <= index < len(self.filtered_commands):
+            command = self.filtered_commands[index]
             self.dismiss(command)
         else:
             self.dismiss(None)
@@ -129,6 +131,5 @@ class CommandPalette(ModalScreen[Command | None]):
         """列表项选中"""
         if event.list_view.id == "command-list":
             index = event.list_view.index
-            if 0 <= index < len(self.filtered_commands):
-                self.selected_index = index
+            if index is not None and 0 <= index < len(self.filtered_commands):
                 self._select_command()
