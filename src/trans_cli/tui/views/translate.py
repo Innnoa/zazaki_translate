@@ -141,9 +141,9 @@ class TranslateView(Vertical):
         """Worker 状态变化处理"""
         if event.worker.name != "translate":
             return
-        if event.state == "success":
+        if event.state.name == "SUCCESS":
             self._on_translate_complete(event.worker.result)
-        elif event.state == "error":
+        elif event.state.name == "ERROR":
             self.state.translation_in_progress = False
             self._update_status("✗ Translation failed", "status-error")
             self.app.notify(str(event.worker.error), severity="error")

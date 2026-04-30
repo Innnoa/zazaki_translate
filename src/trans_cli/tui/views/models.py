@@ -79,10 +79,10 @@ class ModelsView(Vertical):
         """Worker 状态变化处理"""
         if event.worker.name != "install-models":
             return
-        if event.state == "success":
+        if event.state.name == "SUCCESS":
             self._refresh_models()
             self.app.notify("Models installed", severity="information")
-        elif event.state == "error":
+        elif event.state.name == "ERROR":
             self.app.notify(str(event.worker.error), severity="error")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
