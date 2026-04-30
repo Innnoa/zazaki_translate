@@ -1,27 +1,26 @@
 """TranslateView 组件测试"""
 
-import importlib.util
 from unittest.mock import MagicMock
 
 import pytest
 
+textual = pytest.importorskip("textual", reason="Textual is required for TranslateView tests")
+
 from trans_cli.tui.views.translate import TranslateView, TranslationError
 from trans_cli.tui.state import AppState
 
-TEXTUAL_AVAILABLE = importlib.util.find_spec("textual") is not None
+from textual.app import App, ComposeResult
 
-if TEXTUAL_AVAILABLE:
-    from textual.app import App, ComposeResult
 
-    class TranslateViewApp(App):
-        """测试应用"""
+class TranslateViewApp(App):
+    """测试应用"""
 
-        def __init__(self, state: AppState) -> None:
-            super().__init__()
-            self.state = state
+    def __init__(self, state: AppState) -> None:
+        super().__init__()
+        self.state = state
 
-        def compose(self) -> ComposeResult:
-            yield TranslateView(state=self.state)
+    def compose(self) -> ComposeResult:
+        yield TranslateView(state=self.state)
 
 
 def make_mock_state() -> AppState:
@@ -34,7 +33,6 @@ def make_mock_state() -> AppState:
 
 
 @pytest.mark.asyncio
-@pytest.mark.skipif(not TEXTUAL_AVAILABLE, reason="Textual behavior tests require the tui extra")
 async def test_translate_view_compose():
     """测试 TranslateView 组合"""
     state = make_mock_state()
@@ -52,7 +50,6 @@ async def test_translate_view_compose():
 
 
 @pytest.mark.asyncio
-@pytest.mark.skipif(not TEXTUAL_AVAILABLE, reason="Textual behavior tests require the tui extra")
 async def test_translate_view_clear():
     """测试清空功能"""
     state = make_mock_state()
@@ -71,7 +68,6 @@ async def test_translate_view_clear():
 
 
 @pytest.mark.asyncio
-@pytest.mark.skipif(not TEXTUAL_AVAILABLE, reason="Textual behavior tests require the tui extra")
 async def test_translate_view_direction_display():
     """测试语言方向显示"""
     state = make_mock_state()
@@ -85,7 +81,6 @@ async def test_translate_view_direction_display():
 
 
 @pytest.mark.asyncio
-@pytest.mark.skipif(not TEXTUAL_AVAILABLE, reason="Textual behavior tests require the tui extra")
 async def test_translate_view_swap_direction():
     """测试交换语言方向"""
     state = make_mock_state()
@@ -105,7 +100,6 @@ async def test_translate_view_swap_direction():
 
 
 @pytest.mark.asyncio
-@pytest.mark.skipif(not TEXTUAL_AVAILABLE, reason="Textual behavior tests require the tui extra")
 async def test_translate_view_empty_input():
     """测试空输入翻译"""
     state = make_mock_state()
@@ -120,7 +114,6 @@ async def test_translate_view_empty_input():
 
 
 @pytest.mark.asyncio
-@pytest.mark.skipif(not TEXTUAL_AVAILABLE, reason="Textual behavior tests require the tui extra")
 async def test_translate_view_toggle_focus():
     """测试焦点切换"""
     state = make_mock_state()

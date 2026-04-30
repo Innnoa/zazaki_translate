@@ -93,6 +93,10 @@ class TranslateView(Vertical):
         if not to_code:
             to_code = "en" if from_code == "zh" else "zh"
 
+        # 保存检测到的语言代码供历史记录使用
+        self._pending_from_code = from_code
+        self._pending_to_code = to_code
+
         # 在后台线程执行翻译
         self.run_worker(
             self._do_translate,
@@ -130,11 +134,20 @@ class TranslateView(Vertical):
         self.state.last_output = result
 
         # 保存历史
-        self._save_history(result)
+        self._save_history(
+            result,
+            from_code=getattr(self, "_pending_from_code", None),
+            to_code=getattr(self, "_pending_to_code", None),
+        )
 
         self.app.notify("Translated", severity="information")
 
-    def _save_history(self, result: str) -> None:
+    def _save_history(
+        self,
+        result: str,
+        from_code: str | None = None,
+        to_code: str | None = None,
+    ) -> None:
         """保存到历史记录"""
         if not self.state.config.save_history:
             return
@@ -145,8 +158,8 @@ class TranslateView(Vertical):
         entry = HistoryEntry(
             input_text=text,
             output_text=result,
-            from_code=self.state.from_code or "auto",
-            to_code=self.state.to_code or "auto",
+            from_code=from_code or self.state.from_code or "auto",
+            to_code=to_code or self.state.to_code or "auto",
             created_at=datetime.now(UTC).isoformat(timespec="seconds"),
         )
 
@@ -172,8 +185,11 @@ class TranslateView(Vertical):
 
     def action_copy_output(self) -> None:
         """复制输出"""
-        # Textual 没有直接的剪贴板支持，显示提示
-        self.app.notify("Select and copy the output text", severity="information")
+        if self.state.last_output:
+            self.app.copy_to_clipboard(self.state.last_output)
+            self.app.notify("Copied to clipboard", severity="information")
+        else:
+            self.app.notify("Nothing to copy", severity="warning")
 
     def action_toggle_focus(self) -> None:
         """切换焦点"""
