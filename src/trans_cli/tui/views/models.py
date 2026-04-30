@@ -7,11 +7,6 @@ from textual.binding import Binding
 from textual.containers import Vertical
 from textual.widgets import Button, DataTable, Label
 
-from trans_cli.backend import (
-    DependencyMissingError,
-    ModelMissingError,
-    TranslationRuntimeError,
-)
 from trans_cli.model_status import get_model_statuses, install_default_models
 from trans_cli.tui.state import AppState
 
@@ -45,10 +40,17 @@ class ModelsView(Vertical):
         table = self.query_one("#models-table", DataTable)
         table.clear()
 
+        status_map = {
+            "installed": "✓ Installed",
+            "missing": "✗ Not Installed",
+            "runtime-missing": "⚠ Runtime Missing",
+            "error": "✗ Error",
+        }
+
         statuses = get_model_statuses(self.state.translator)
         for status in statuses:
-            status_text = "✓ Installed" if status.status == "installed" else "✗ Not Installed"
-            size_text = "~50MB" if status.status == "installed" else "N/A"
+            status_text = status_map.get(status.status, "✗ Unknown")
+            size_text = "—" if status.status == "installed" else "N/A"
             table.add_row(
                 f"{status.from_code}→{status.to_code}",
                 status_text,
@@ -62,12 +64,23 @@ class ModelsView(Vertical):
 
     def action_install_models(self) -> None:
         """安装模型"""
-        try:
-            install_default_models(self.state.translator)
+        self.run_worker(
+            self._do_install_models,
+            thread=True,
+            callback=self._on_install_complete,
+        )
+
+    def _do_install_models(self) -> None:
+        """后台安装模型"""
+        install_default_models(self.state.translator)
+
+    def _on_install_complete(self, result: object) -> None:
+        """安装完成回调"""
+        if isinstance(result, Exception):
+            self.app.notify(str(result), severity="error")
+        else:
             self._refresh_models()
             self.app.notify("Models installed", severity="information")
-        except (DependencyMissingError, ModelMissingError, TranslationRuntimeError) as exc:
-            self.app.notify(str(exc), severity="error")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """按钮点击处理"""
