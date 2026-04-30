@@ -1,0 +1,12 @@
+{"type":"click","text":"T\n      \n        Translate\n        Input/output panes, auto/manual direction, swap direction, clear input, copy output.","choice":"translate","id":null,"timestamp":1777342321849}
+{"type":"click","text":"H\n      \n        History\n        Local JSONL history, searchable list, reopen previous translation.","choice":"history","id":null,"timestamp":1777342322472}
+{"type":"click","text":"T\n      \n        Translate\n        Input/output panes, auto/manual direction, swap direction, clear input, copy output.","choice":"translate","id":null,"timestamp":1777342323172}
+{"type":"click","text":"H\n      \n        History\n        Local JSONL history, searchable list, reopen previous translation.","choice":"history","id":null,"timestamp":1777342323487}
+{"type":"click","text":"T\n      \n        Translate\n        Input/output panes, auto/manual direction, swap direction, clear input, copy output.","choice":"translate","id":null,"timestamp":1777342323847}
+{"type":"click","text":"T\n      \n        Translate\n        Input/output panes, auto/manual direction, swap direction, clear input, copy output.","choice":"translate","id":null,"timestamp":1777342324308}
+{"type":"click","text":"H\n      \n        History\n        Local JSONL history, searchable list, reopen previous translation.","choice":"history","id":null,"timestamp":1777342324718}
+{"type":"click","text":"T\n      \n        Translate\n        Input/output panes, auto/manual direction, swap direction, clear input, copy output.","choice":"translate","id":null,"timestamp":1777342325089}
+{"type":"click","text":"H\n      \n        History\n        Local JSONL history, searchable list, reopen previous translation.","choice":"history","id":null,"timestamp":1777342325387}
+{"type":"click","text":"T\n      \n        Translate\n        Input/output panes, auto/manual direction, swap direction, clear input, copy output.","choice":"translate","id":null,"timestamp":1777342325735}
+{"type":"click","text":"M\n      \n        Models\n        Show installed/missing model state and trigger the existing install flow with progress messages.","choice":"models","id":null,"timestamp":1777342331114}
+{"type":"click","text":"M\n      \n        Models\n        Show installed/missing model state and trigger the existing install flow with progress messages.","choice":"models","id":null,"timestamp":1777342331550}

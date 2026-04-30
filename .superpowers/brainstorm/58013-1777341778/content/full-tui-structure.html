@@ -1,0 +1,75 @@
+<h2>Full TUI App structure</h2>
+<p class="subtitle">Proposed first version for <code>trans --tui</code> using Textual and Catppuccin Mocha.</p>
+
+<div class="mockup">
+  <div class="mockup-header">trans --tui · Catppuccin Mocha · Full App</div>
+  <div class="mockup-body">
+    <div style="background:#1e1e2e;color:#cdd6f4;border:1px solid #45475a;border-radius:10px;padding:14px;font-family:ui-monospace,Menlo,monospace;">
+      <div style="display:grid;grid-template-columns:150px 1fr;gap:12px;min-height:360px;">
+        <div style="background:#11111b;border:1px solid #313244;border-radius:8px;padding:10px;">
+          <div style="color:#89b4fa;font-weight:700;margin-bottom:12px;">trans</div>
+          <div style="background:#313244;color:#cdd6f4;border-radius:6px;padding:6px;margin-bottom:6px;">Translate</div>
+          <div style="color:#9399b2;padding:6px;margin-bottom:6px;">History</div>
+          <div style="color:#9399b2;padding:6px;margin-bottom:6px;">Models</div>
+          <div style="color:#9399b2;padding:6px;margin-bottom:6px;">Settings</div>
+          <div style="margin-top:140px;color:#6c7086;">F1 help<br>q quit</div>
+        </div>
+        <div style="display:grid;grid-template-rows:auto 1fr auto;gap:10px;">
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span style="background:#313244;color:#89b4fa;border-radius:999px;padding:4px 10px;">auto</span>
+            <span style="background:#313244;color:#a6e3a1;border-radius:999px;padding:4px 10px;">zh ⇄ en</span>
+            <span style="background:#313244;color:#f9e2af;border-radius:999px;padding:4px 10px;">models unknown</span>
+            <span style="margin-left:auto;color:#6c7086;">Ctrl+Enter translate</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div style="background:#181825;border:1px solid #45475a;border-radius:8px;padding:10px;">
+              <div style="color:#a6e3a1;margin-bottom:8px;">Input</div>
+              <div style="min-height:210px;color:#cdd6f4;">How do I install this on Arch?</div>
+            </div>
+            <div style="background:#181825;border:1px solid #45475a;border-radius:8px;padding:10px;">
+              <div style="color:#f9e2af;margin-bottom:8px;">Output</div>
+              <div style="min-height:210px;color:#cdd6f4;">我如何在 Arch 上安装它？</div>
+            </div>
+          </div>
+          <div style="background:#11111b;border:1px solid #313244;border-radius:8px;padding:8px;color:#9399b2;">
+            Status: offline backend · last translation 320ms · history saved to local JSONL
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>First-version modules</h3>
+  <div class="options" data-multiselect>
+    <div class="option" data-choice="translate" onclick="toggleSelect(this)">
+      <div class="letter">T</div>
+      <div class="content">
+        <h3>Translate</h3>
+        <p>Input/output panes, auto/manual direction, swap direction, clear input, copy output.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="history" onclick="toggleSelect(this)">
+      <div class="letter">H</div>
+      <div class="content">
+        <h3>History</h3>
+        <p>Local JSONL history, searchable list, reopen previous translation.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="models" onclick="toggleSelect(this)">
+      <div class="letter">M</div>
+      <div class="content">
+        <h3>Models</h3>
+        <p>Show installed/missing model state and trigger the existing install flow with progress messages.</p>
+      </div>
+    </div>
+    <div class="option" data-choice="settings" onclick="toggleSelect(this)">
+      <div class="letter">S</div>
+      <div class="content">
+        <h3>Settings</h3>
+        <p>Default direction, Catppuccin flavor, history on/off, startup mode stored in a small TOML file.</p>
+      </div>
+    </div>
+  </div>
+</div>

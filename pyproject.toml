@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trans"
+version = "0.1.0"
+description = "Offline Chinese-English command-line translator"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=9,<10", "textual>=6,<7"]
+runtime = ["argostranslate>=1.11,<2"]
+tui = ["textual>=6,<7"]
+
+[project.scripts]
+trans = "trans_cli.cli:main"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

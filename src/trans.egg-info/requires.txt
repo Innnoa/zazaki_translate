@@ -1,0 +1,6 @@
+
+[dev]
+pytest<10,>=9
+
+[runtime]
+argostranslate<2,>=1.11

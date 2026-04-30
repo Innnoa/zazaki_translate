@@ -1,0 +1,17 @@
+README.md
+pyproject.toml
+src/trans.egg-info/PKG-INFO
+src/trans.egg-info/SOURCES.txt
+src/trans.egg-info/dependency_links.txt
+src/trans.egg-info/entry_points.txt
+src/trans.egg-info/requires.txt
+src/trans.egg-info/top_level.txt
+src/trans_cli/__init__.py
+src/trans_cli/backend.py
+src/trans_cli/cli.py
+src/trans_cli/core.py
+src/trans_cli/repl.py
+tests/test_backend.py
+tests/test_cli.py
+tests/test_core.py
+tests/test_repl.py
