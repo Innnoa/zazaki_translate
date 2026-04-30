@@ -27,7 +27,6 @@ class TranslateView(Vertical):
     """双栏翻译视图"""
 
     BINDINGS = [
-        Binding("ctrl+enter", "translate", "Translate", show=True),
         Binding("s", "swap_direction", "Swap", show=True),
         Binding("c", "clear_input", "Clear", show=True),
         Binding("y", "copy_output", "Copy", show=True),
@@ -38,6 +37,7 @@ class TranslateView(Vertical):
     def __init__(self, state: AppState, **kwargs) -> None:
         super().__init__(**kwargs)
         self.state = state
+        self._translate_timer = None
 
     def compose(self) -> ComposeResult:
         """组合组件"""
@@ -62,6 +62,21 @@ class TranslateView(Vertical):
         """挂载后初始化"""
         self.update_direction_display()
 
+    def on_text_area_changed(self, event: TextArea.Changed) -> None:
+        """输入变化时自动翻译（防抖 500ms）"""
+        if event.text_area.id != "source-input":
+            return
+        # 取消之前的定时器
+        if self._translate_timer is not None:
+            self._translate_timer.stop()
+        # 设置新的定时器
+        text = event.text_area.text.strip()
+        if text:
+            self._translate_timer = self.set_timer(0.5, lambda: self.action_translate())
+        else:
+            # 清空输出
+            self.query_one("#translation-output", RichLog).clear()
+
     def update_direction_display(self) -> None:
         """更新语言方向显示"""
         direction_btn = self.query_one("#lang-direction", Button)
@@ -72,14 +87,12 @@ class TranslateView(Vertical):
     def action_translate(self) -> None:
         """执行翻译"""
         if self.state.translation_in_progress:
-            self.app.notify("Translation is still running", severity="warning")
             return
 
         input_widget = self.query_one("#source-input", TextArea)
         text = input_widget.text.strip()
 
         if not text:
-            self.app.notify("Input is empty", severity="warning")
             return
 
         self.state.translation_in_progress = True
@@ -147,8 +160,6 @@ class TranslateView(Vertical):
             from_code=getattr(self, "_pending_from_code", None),
             to_code=getattr(self, "_pending_to_code", None),
         )
-
-        self.app.notify("Translated", severity="information")
 
     def _save_history(
         self,
