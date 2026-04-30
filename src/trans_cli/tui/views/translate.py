@@ -121,10 +121,7 @@ class TranslateView(Vertical):
 
         # 在后台线程执行翻译
         self.run_worker(
-            self._do_translate,
-            text,
-            from_code,
-            to_code,
+            lambda: self._do_translate(text, from_code, to_code),
             thread=True,
             name="translate",
         )
