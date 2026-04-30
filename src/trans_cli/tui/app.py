@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
 from textual.widgets import Footer, Header, Static
 
 from trans_cli.backend import ArgosTranslator
-from trans_cli.config import TransConfig, load_config, save_config
+from trans_cli.config import load_config, save_config
 from trans_cli.tui.state import AppState, Page
 from trans_cli.tui.theme import build_css
 from trans_cli.tui.widgets.sidebar import Sidebar
@@ -59,7 +61,11 @@ class TransApp(App):
 
     def on_mount(self) -> None:
         """挂载后初始化"""
-        self.show_page(Page.TRANSLATE)
+        try:
+            startup = Page(self.config.startup_page)
+        except (ValueError, KeyError):
+            startup = Page.TRANSLATE
+        self.show_page(startup)
         self._update_status_bar()
 
     # ── Page navigation ────────────────────────────────────────────
@@ -147,16 +153,10 @@ class TransApp(App):
             pass
 
     def action_set_theme(self, theme: str) -> None:
-        """设置主题（创建新的 frozen config 实例）"""
-        new_config = TransConfig(
-            theme=theme,
-            default_direction=self.config.default_direction,
-            save_history=self.config.save_history,
-            startup_page=self.config.startup_page,
-        )
-        save_config(new_config)
-        self.config = new_config
-        self.state.config = new_config
+        """设置主题（使用 dataclasses.replace 保持 forward compat）"""
+        self.config = replace(self.config, theme=theme)
+        save_config(self.config)
+        self.state.config = self.config
         self.CSS = build_css(theme)
         self.notify(f"Theme changed to {theme}", severity="information")
 
