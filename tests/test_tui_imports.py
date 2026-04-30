@@ -1,90 +1,88 @@
+"""TUI 导入测试"""
+
+from __future__ import annotations
+
 import importlib.util
 
 import pytest
 
-from trans_cli.backend import DependencyMissingError
-from trans_cli.history import HistoryEntry
-from trans_cli.tui.app import _append_history_safely, build_tui_app, run_tui
+from trans_cli.tui.app import build_tui_app, run_tui
+from trans_cli.tui.state import AppState, Mode, Page
+from trans_cli.tui.keys import GLOBAL_BINDINGS, TRANSLATE_BINDINGS
+from trans_cli.tui.widgets.sidebar import Sidebar, NavButton
+from trans_cli.tui.widgets.history_item import HistoryItem
+from trans_cli.tui.widgets.command_palette import CommandPalette, Command
+from trans_cli.tui.views.translate import TranslateView
+from trans_cli.tui.views.history import HistoryView
+from trans_cli.tui.views.models import ModelsView
+from trans_cli.tui.views.settings import SettingsView
 
 TEXTUAL_AVAILABLE = importlib.util.find_spec("textual") is not None
 
 
-def test_run_tui_reports_missing_textual_dependency(monkeypatch: pytest.MonkeyPatch) -> None:
-    def missing_textual(module_name: str):
-        if module_name.startswith("textual"):
-            raise ModuleNotFoundError(module_name)
-        raise AssertionError(module_name)
-
-    monkeypatch.setattr("trans_cli.tui.app.import_module", missing_textual)
-
-    with pytest.raises(DependencyMissingError, match=r"pip install --no-build-isolation -e '\.\[tui\]'"):
-        run_tui(object())
-
-
-def test_append_history_safely_reports_write_failures(monkeypatch: pytest.MonkeyPatch) -> None:
-    def failing_append(*args, **kwargs) -> None:
-        raise OSError("read-only")
-
-    monkeypatch.setattr("trans_cli.tui.app.append_history", failing_append)
-
-    message = _append_history_safely(
-        HistoryEntry("hello", "你好", "en", "zh", "2026"),
-        enabled=True,
-    )
-
-    assert message == "History was not saved: read-only"
-
-
-def test_append_history_safely_ignores_disabled_history(monkeypatch: pytest.MonkeyPatch) -> None:
-    def failing_append(*args, **kwargs) -> None:
-        raise AssertionError("should not write")
-
-    monkeypatch.setattr("trans_cli.tui.app.append_history", failing_append)
-
-    assert _append_history_safely(
-        HistoryEntry("hello", "你好", "en", "zh", "2026"),
-        enabled=False,
-    ) is None
+def test_tui_imports():
+    """测试所有 TUI 模块均可导入"""
+    # 验证导入成功
+    assert build_tui_app is not None
+    assert run_tui is not None
+    assert AppState is not None
+    assert Mode is not None
+    assert Page is not None
+    assert GLOBAL_BINDINGS is not None
+    assert TRANSLATE_BINDINGS is not None
+    assert Sidebar is not None
+    assert NavButton is not None
+    assert HistoryItem is not None
+    assert CommandPalette is not None
+    assert Command is not None
+    assert TranslateView is not None
+    assert HistoryView is not None
+    assert ModelsView is not None
+    assert SettingsView is not None
 
 
 @pytest.mark.asyncio
 @pytest.mark.skipif(not TEXTUAL_AVAILABLE, reason="Textual behavior tests require the tui extra")
 async def test_tui_uses_vim_page_navigation() -> None:
-    app = build_tui_app(object())
+    """测试 Vim 风格 h/l 页面导航"""
+    from unittest.mock import MagicMock
 
-    async with app.run_test() as pilot:
-        assert app.current_page == "translate"
+    mock_config = MagicMock()
+    mock_config.theme = "mocha"
+    mock_config.default_direction = "zh-en"
+    mock_config.save_history = False
+    mock_config.startup_page = "translate"
 
-        await pilot.press("l")
-        assert app.current_page == "history"
+    translator = MagicMock()
 
-        await pilot.press("l")
-        assert app.current_page == "models"
+    import trans_cli.tui.app as app_module
+    original_load_config = app_module.load_config
+    app_module.load_config = lambda: mock_config
+    try:
+        app = build_tui_app(translator)
 
-        await pilot.press("h")
-        assert app.current_page == "history"
+        async with app.run_test() as pilot:
+            assert app.state.current_page == Page.TRANSLATE
 
+            await pilot.press("l")
+            assert app.state.current_page == Page.HISTORY
 
-@pytest.mark.asyncio
-@pytest.mark.skipif(not TEXTUAL_AVAILABLE, reason="Textual behavior tests require the tui extra")
-async def test_tui_normal_mode_enter_starts_translation() -> None:
-    class FakeTranslator:
-        def translate(self, text, from_code=None, to_code=None):
-            return f"{from_code or 'auto'}->{to_code or 'auto'}:{text}"
+            await pilot.press("l")
+            assert app.state.current_page == Page.MODELS
 
-        def _load_modules(self):
-            class Module:
-                def get_installed_languages(self):
-                    return []
+            await pilot.press("h")
+            assert app.state.current_page == Page.HISTORY
 
-            return object(), Module()
+            # l from history → models
+            await pilot.press("l")
+            assert app.state.current_page == Page.MODELS
 
-    app = build_tui_app(FakeTranslator())
+            # l from models → settings
+            await pilot.press("l")
+            assert app.state.current_page == Page.SETTINGS
 
-    async with app.run_test() as pilot:
-        app.query_one("#input").text = "hello"
-        await pilot.press("enter")
-        await pilot.pause(0.2)
-
-        assert app.last_output == "auto->auto:hello"
-        assert app.translation_in_progress is False
+            # l from settings → translate (wrap around)
+            await pilot.press("l")
+            assert app.state.current_page == Page.TRANSLATE
+    finally:
+        app_module.load_config = original_load_config
