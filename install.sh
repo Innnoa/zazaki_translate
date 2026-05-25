@@ -23,7 +23,7 @@ ok "Python $PY_VER"
 
 # --- create virtual environment ---
 if [ ! -d "$VENV" ]; then
-    info "Creating virtual environment at $VENV ..."
+    info "Creating virtual environment at $VENV"
     "$PYTHON" -m venv "$VENV"
 fi
 ok "Virtual environment ready"
@@ -32,7 +32,7 @@ ok "Virtual environment ready"
 if "$VENV/bin/python" -c 'import argostranslate' 2>/dev/null; then
     ok "Package already installed, skipping"
 else
-    info "Installing dependencies (this may take a while on first run)..."
+    info "Installing dependencies -- this may take a while on first run"
     "$VENV/bin/pip" install -q --upgrade pip
     "$VENV/bin/pip" install -e "$SCRIPT_DIR[tui,runtime]"
     ok "Package installed"
