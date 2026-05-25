@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 VENV="${VENV_PATH:-$SCRIPT_DIR/.venv}"
 PYTHON="${PYTHON:-python3}"
 BIN_DIR="${HOME}/.local/bin"
-TRANS_CMD="${BIN_DIR}/trans"
+TRANS_CMD="${BIN_DIR}/zazaki_trans"
 
 info() { printf '\033[1;34m→\033[0m %s\n' "$1"; }
 err()  { printf '\033[1;31m✗\033[0m %s\n' "$1" >&2; exit 1; }
@@ -66,15 +66,15 @@ if [ -n "$RC_FILE" ] && ! grep -qF "$BIN_DIR" "$RC_FILE" 2>/dev/null; then
 elif echo "$PATH" | grep -qF "$BIN_DIR"; then
     ok "$BIN_DIR already in PATH"
 else
-    info "Add $BIN_DIR to your PATH manually to use 'trans' globally:"
+    info "Add $BIN_DIR to your PATH manually to use 'zazaki_trans' globally:"
     printf '    export PATH="%s:$PATH"\n' "$BIN_DIR"
 fi
 
-ok "'trans' command ready"
+ok "'zazaki_trans' command ready"
 echo ""
 echo "──────────────────────────────────────────"
 echo "Usage:"
-echo "  trans --tui          launch the workbench"
-echo "  trans --help          show all options"
-echo "  trans 'hello world'   quick translate"
+echo "  zazaki_trans --tui          launch the workbench"
+echo "  zazaki_trans --help          show all options"
+echo "  zazaki_trans 'hello world'   quick translate"
 echo "──────────────────────────────────────────"
