@@ -29,15 +29,9 @@ fi
 ok "Virtual environment ready"
 
 # --- install package ---
-info "Installing zazaki_trans with TUI dependencies..."
+info "Installing zazaki_trans (this may take a while on first run)..."
 "$VENV/bin/pip" install -q --upgrade pip
-"$VENV/bin/pip" install -q -e "$SCRIPT_DIR[tui]"
-
-# --- verify runtime ---
-info "Verifying runtime import..."
-if ! "$VENV/bin/python" -c 'import trans_cli.cli' 2>/dev/null; then
-    "$VENV/bin/pip" install -e "$SCRIPT_DIR[runtime]"
-fi
+"$VENV/bin/pip" install -e "$SCRIPT_DIR[tui,runtime]"
 ok "Package installed"
 
 # --- global command ---
