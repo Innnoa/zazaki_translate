@@ -5,3 +5,8 @@ docs/superpowers/plans/
 *.egg-info/
 __pycache__/
 *.py[cod]
+.codex
+.serena/
+.superpowers/
+outputs/
+uv.lock
