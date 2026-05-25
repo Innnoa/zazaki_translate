@@ -46,7 +46,7 @@ def main(
 
         if args.tui or sys.stdin.isatty():
             if tui_runner is None:
-                from trans_cli.tui.app import run_tui
+                from trans_cli.tui2.app import run_tui
 
                 tui_runner = run_tui
             return tui_runner(translator)

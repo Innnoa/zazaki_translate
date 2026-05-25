@@ -9,7 +9,7 @@ from typing import Any
 
 THEMES = {"latte", "frappe", "macchiato", "mocha"}
 DIRECTIONS = {"auto", "zh-en", "en-zh"}
-STARTUP_PAGES = {"translate", "history", "models", "settings"}
+STARTUP_PAGES = {"translate"}
 
 
 @dataclass(frozen=True)

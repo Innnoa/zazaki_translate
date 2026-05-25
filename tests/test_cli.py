@@ -53,6 +53,23 @@ def test_main_launches_tui_with_injected_runner() -> None:
     assert launched == [translator]
 
 
+def test_main_imports_new_tui_runner_when_no_runner_is_injected(monkeypatch) -> None:
+    launched = []
+
+    def fake_run_tui(translator) -> int:
+        launched.append(translator)
+        return 3
+
+    import trans_cli.tui2.app as tui2_app
+
+    monkeypatch.setattr(tui2_app, "run_tui", fake_run_tui)
+
+    exit_code = main(["--tui"], translator=FakeTranslator())
+
+    assert exit_code == 3
+    assert len(launched) == 1
+
+
 def test_main_installs_models() -> None:
     stdout = StringIO()
     translator = FakeTranslator()
