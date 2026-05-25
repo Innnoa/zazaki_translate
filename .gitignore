@@ -1,5 +1,6 @@
 .worktrees/
 CURRENT_TASK.md
+DECISIONS.md
 docs/superpowers/specs/
 docs/superpowers/plans/
 *.egg-info/
