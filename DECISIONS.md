@@ -56,3 +56,17 @@
   - TUI 短句翻译默认使用单段 fast path，减少 `stanza` 分句初始化带来的中译英延迟；普通 CLI/REPL 保持原路径
   - TUI 翻译动作必须在 Textual thread worker 中执行，不能阻塞主界面消息循环
   - TUI 采用类 Vim normal-mode 控制，页面用 `h/l` 切换，编辑输入用 `i` 进入焦点、`Esc` 返回 normal mode
+
+## 2026-05-22: 新终端工作台改为 `prompt_toolkit + Rich` 单页 `tui2`
+
+- 结论：新的终端工作台不再沿用 `Textual` 多页架构，改为基于 `prompt_toolkit + Rich` 的单页 `tui2` workbench；`Settings` / `Models` 保留为轻量 modal surface，`Ctrl+P` 命令面板不再保留为主控制模型
+- 原因：
+  - 当前产品目标是“终端内、极简专业、以输入和结果为中心”的翻译工作台，旧 `Textual` 页面化结构和侧边栏导航过重
+  - `prompt_toolkit` 更贴合文本输入、焦点控制、按键绑定和 debounce 调度；`Rich` 更适合紧凑输出与状态表现
+  - 迁移期采用并行 `tui2` 模块族，能在不立即破坏现有 CLI/REPL 路径的前提下验证真实 runtime 与交互体验
+- 影响：
+  - `src/trans_cli/tui2/` 成为新 TUI 的主实现面，职责边界按 `app/state/actions/render/modals/theme` 拆分
+  - `--tui` 路径已切到 `trans_cli.tui2.app.run_tui`
+  - `tui` extra 需要显式包含 `prompt_toolkit`、`rich`，以及用于系统剪贴板桥接的 `pyperclip`
+  - 旧 `Textual` 实现与相关测试只在新 runtime 完整验证后再退场，不在本决策点同步删除
+  - 2026-05-25 更新：新 `tui2` runtime 已完整验证（全量 pytest 101 passed、PTY smoke 通过、pyright 清洁），旧 `Textual` `tui/` 代码与测试已正式删除
