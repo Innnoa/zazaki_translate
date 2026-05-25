@@ -29,10 +29,14 @@ fi
 ok "Virtual environment ready"
 
 # --- install package ---
-info "Installing zazaki_trans (this may take a while on first run)..."
-"$VENV/bin/pip" install -q --upgrade pip
-"$VENV/bin/pip" install -e "$SCRIPT_DIR[tui,runtime]"
-ok "Package installed"
+if "$VENV/bin/python" -c 'import argostranslate' 2>/dev/null; then
+    ok "Package already installed, skipping"
+else
+    info "Installing dependencies (this may take a while on first run)..."
+    "$VENV/bin/pip" install -q --upgrade pip
+    "$VENV/bin/pip" install -e "$SCRIPT_DIR[tui,runtime]"
+    ok "Package installed"
+fi
 
 # --- global command ---
 mkdir -p "$BIN_DIR"
