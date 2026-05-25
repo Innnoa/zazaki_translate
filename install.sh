@@ -36,27 +36,43 @@ info "Installing zazaki_trans with TUI dependencies..."
 # --- verify runtime ---
 info "Verifying runtime import..."
 if ! "$VENV/bin/python" -c 'import trans_cli.cli' 2>/dev/null; then
-    "VENV/bin/pip" install -e "$SCRIPT_DIR[runtime]"
+    "$VENV/bin/pip" install -e "$SCRIPT_DIR[runtime]"
 fi
 ok "Package installed"
 
 # --- global command ---
-if [ ! -d "$BIN_DIR" ]; then
-    mkdir -p "$BIN_DIR"
-fi
+mkdir -p "$BIN_DIR"
+rm -f "$TRANS_CMD"
 
-cat > "$TRANS_CMD" <<EOF
+cat > "$TRANS_CMD" <<'SCRIPT'
 #!/usr/bin/env bash
-exec "$VENV/bin/trans" "\$@"
-EOF
+exec _TRANS_VENV_/bin/trans "$@"
+SCRIPT
+sed -i "s|_TRANS_VENV_|$VENV|g" "$TRANS_CMD"
 chmod +x "$TRANS_CMD"
 
-if ! echo "$PATH" | grep -qF "$BIN_DIR"; then
-    info "Add $BIN_DIR to your PATH to use 'trans' globally:"
+# --- ensure ~/.local/bin is in PATH ---
+RC_FILE=""
+if [ -n "${ZSH_VERSION-}" ] || [ -f "$HOME/.zshrc" ]; then
+    RC_FILE="$HOME/.zshrc"
+elif [ -f "$HOME/.bashrc" ]; then
+    RC_FILE="$HOME/.bashrc"
+elif [ -f "$HOME/.profile" ]; then
+    RC_FILE="$HOME/.profile"
+fi
+
+if [ -n "$RC_FILE" ] && ! grep -qF "$BIN_DIR" "$RC_FILE" 2>/dev/null; then
+    printf '\n# added by zazaki_trans install\n' >>"$RC_FILE"
+    printf 'export PATH="%s:$PATH"\n' "$BIN_DIR" >>"$RC_FILE"
+    ok "Added $BIN_DIR to $RC_FILE"
+elif echo "$PATH" | grep -qF "$BIN_DIR"; then
+    ok "$BIN_DIR already in PATH"
+else
+    info "Add $BIN_DIR to your PATH manually to use 'trans' globally:"
     printf '    export PATH="%s:$PATH"\n' "$BIN_DIR"
 fi
 
-ok "'trans' command installed at $TRANS_CMD"
+ok "'trans' command ready"
 echo ""
 echo "──────────────────────────────────────────"
 echo "Usage:"
