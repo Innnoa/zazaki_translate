@@ -5,10 +5,9 @@ Offline Chinese-English command-line translator with modern TUI interface.
 ## Features
 
 - Fast offline translation using Argos Translate
-- Modern TUI interface with Catppuccin themes
-- Vim-style keyboard navigation
-- Translation history with search
-- Easy model management
+- Single-page terminal workbench for input and results
+- Modal settings and model management from the workbench
+- Catppuccin themes and quick keyboard shortcuts
 
 ## Installation
 
@@ -33,6 +32,8 @@ Downloads `zh -> en` and `en -> zh` models. After that, everything works offline
 ```bash
 trans --tui
 ```
+
+The TUI is a single-page translation workbench: type in the input pane, review results in the output pane, and open settings or model status without leaving the main screen.
 
 ### CLI Mode
 
@@ -61,44 +62,15 @@ trans -f zh -t en "你好"
 
 ## Keyboard Shortcuts
 
-### Global
-
 | Key | Action |
 |-----|--------|
-| `h` / `l` | Previous / Next page |
-| `j` / `k` | Focus down / up |
-| `Ctrl+P` | Command palette |
+| `F2` | Open settings modal |
+| `F3` | Open models modal |
+| `Tab` | Toggle focus between input and output |
+| `Ctrl+R` | Retry translation for current input |
+| `Ctrl+D` | Clear input and output |
+| `Esc` | Close the active modal |
 | `q` | Quit |
-
-### Translate Page
-
-| Key | Action |
-|-----|--------|
-| `Ctrl+Enter` | Translate |
-| `s` | Swap language direction |
-| `c` | Clear input |
-| `y` | Copy output |
-| `Tab` | Toggle focus between input/output |
-
-### History Page
-
-| Key | Action |
-|-----|--------|
-| `/` | Search |
-| `r` | Refresh |
-
-### Models Page
-
-| Key | Action |
-|-----|--------|
-| `r` | Refresh |
-| `i` | Install models |
-
-### Settings Page
-
-| Key | Action |
-|-----|--------|
-| `s` | Save settings |
 
 ## Themes
 
@@ -109,7 +81,7 @@ Supports all Catppuccin flavors:
 - **Macchiato** (dark)
 - **Mocha** (darkest, default)
 
-Switch themes via the Settings page or the command palette.
+Switch themes via the settings modal.
 
 ## Configuration
 

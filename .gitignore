@@ -2,3 +2,6 @@
 CURRENT_TASK.md
 docs/superpowers/specs/
 docs/superpowers/plans/
+*.egg-info/
+__pycache__/
+*.py[cod]
