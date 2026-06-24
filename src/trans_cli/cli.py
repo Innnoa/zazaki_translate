@@ -1,4 +1,5 @@
 import argparse
+import signal
 import sys
 from typing import Sequence, TextIO
 
@@ -53,6 +54,7 @@ def main(
 
         return run_repl(translator, args.from_lang, args.to_lang, sys.stdin, stdout)
     except KeyboardInterrupt:
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
         stderr.write("\n")
         return 130
     except (DependencyMissingError, ModelMissingError, TranslationRuntimeError) as exc:

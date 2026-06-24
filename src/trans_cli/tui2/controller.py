@@ -84,7 +84,7 @@ class WorkbenchController:
         self._invalidate()
 
     def copy_result(self) -> str:
-        return self.state.output_text
+        return self.state.output_text.strip()
 
     def copy_result_to_clipboard(self, clipboard: TextClipboard) -> None:
         data = self.copy_result()
