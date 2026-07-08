@@ -11,7 +11,7 @@ from trans_cli.tui2.actions import (
     schedule_debounced_translation,
     translate_input,
 )
-from trans_cli.tui2.clipboard import TextClipboard
+from trans_cli.tui2.clipboard import TerminalOutput, TextClipboard, copy_via_osc52
 from trans_cli.tui2.state import DebounceScheduler, FocusTarget, ModalSurface, WorkbenchState
 
 
@@ -86,7 +86,11 @@ class WorkbenchController:
     def copy_result(self) -> str:
         return self.state.output_text.strip()
 
-    def copy_result_to_clipboard(self, clipboard: TextClipboard) -> None:
+    def copy_result_to_clipboard(
+        self,
+        clipboard: TextClipboard,
+        terminal_output: TerminalOutput | None = None,
+    ) -> None:
         data = self.copy_result()
         if not data:
             self.state.copy_status = "nothing to copy"
@@ -95,6 +99,16 @@ class WorkbenchController:
         try:
             clipboard.set_text(data)
         except Exception:
+            if terminal_output is not None:
+                try:
+                    copy_via_osc52(data, terminal_output)
+                except Exception:
+                    self.state.copy_status = "clipboard unavailable"
+                    self._invalidate()
+                    return
+                self.state.copy_status = "copied"
+                self._invalidate()
+                return
             self.state.copy_status = "clipboard unavailable"
             self._invalidate()
             return

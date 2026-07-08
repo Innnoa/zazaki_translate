@@ -64,6 +64,6 @@ def build_key_bindings(
 
     @bindings.add("c-y")
     def _copy_result(event) -> None:
-        controller.copy_result_to_clipboard(event.app.clipboard)
+        controller.copy_result_to_clipboard(event.app.clipboard, event.app.output)
 
     return bindings

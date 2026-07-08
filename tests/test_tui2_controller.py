@@ -1,3 +1,4 @@
+from base64 import b64encode
 from collections.abc import Callable
 
 from trans_cli.tui2.controller import WorkbenchController
@@ -68,6 +69,18 @@ class FakeClipboard:
 class ErroringClipboard:
     def set_text(self, text: str) -> None:
         raise RuntimeError(f"clipboard failed:{text}")
+
+
+class FakeOutput:
+    def __init__(self) -> None:
+        self.raw_writes: list[str] = []
+        self.flush_count = 0
+
+    def write_raw(self, data: str) -> None:
+        self.raw_writes.append(data)
+
+    def flush(self) -> None:
+        self.flush_count += 1
 
 
 def test_controller_copy_result_returns_current_output() -> None:
@@ -305,4 +318,22 @@ def test_workbench_controller_copy_result_to_clipboard_handles_clipboard_failure
     controller.copy_result_to_clipboard(ErroringClipboard())
 
     assert controller.state.copy_status == "clipboard unavailable"
+    assert invalidations == ["invalidate"]
+
+
+def test_workbench_controller_copy_result_to_clipboard_falls_back_to_terminal_clipboard() -> None:
+    invalidations: list[str] = []
+    output = FakeOutput()
+    controller = WorkbenchController(
+        state=WorkbenchState(output_text="translated text"),
+        translator=FakeTranslator(),
+        scheduler=RecordingScheduler(),
+        invalidate=lambda: invalidations.append("invalidate"),
+    )
+
+    controller.copy_result_to_clipboard(ErroringClipboard(), output)
+
+    assert controller.state.copy_status == "copied"
+    assert output.raw_writes == [f"\x1b]52;c;{b64encode(b'translated text').decode('ascii')}\x07"]
+    assert output.flush_count == 2
     assert invalidations == ["invalidate"]

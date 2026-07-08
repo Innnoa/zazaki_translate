@@ -1,4 +1,4 @@
-from trans_cli.tui2.clipboard import build_clipboard
+from trans_cli.tui2.clipboard import build_clipboard, copy_via_osc52
 
 
 class FakeClipboard:
@@ -7,6 +7,22 @@ class FakeClipboard:
 
     def set_text(self, text: str) -> None:
         self.values.append(text)
+
+
+class PendingBufferedOutput:
+    def __init__(self) -> None:
+        self.raw_writes: list[str] = []
+        self.flush_count = 0
+        self.pending_before_write = True
+
+    def write_raw(self, data: str) -> None:
+        prefix = " " if self.pending_before_write else ""
+        self.raw_writes.append(prefix + data)
+        self.pending_before_write = True
+
+    def flush(self) -> None:
+        self.flush_count += 1
+        self.pending_before_write = False
 
 
 def test_build_clipboard_returns_clipboard_instance() -> None:
@@ -61,3 +77,12 @@ def test_build_clipboard_does_not_swallow_unexpected_constructor_errors(monkeypa
         assert str(exc) == "unexpected clipboard failure"
     else:
         raise AssertionError("build_clipboard() unexpectedly swallowed RuntimeError")
+
+
+def test_copy_via_osc52_flushes_pending_output_before_sequence() -> None:
+    output = PendingBufferedOutput()
+
+    copy_via_osc52("translated text", output)
+
+    assert output.raw_writes == ["\x1b]52;c;dHJhbnNsYXRlZCB0ZXh0\x07"]
+    assert output.flush_count == 2

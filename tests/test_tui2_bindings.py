@@ -31,8 +31,9 @@ class FakeLayout:
 
 
 class FakeApp:
-    def __init__(self, *, clipboard: object | None = None) -> None:
+    def __init__(self, *, clipboard: object | None = None, output: object | None = None) -> None:
         self.clipboard = clipboard
+        self.output = output
         self.layout = FakeLayout()
         self.exit_results: list[int] = []
 
@@ -45,6 +46,7 @@ class FakeController:
         self.state = state
         self.calls: list[str] = []
         self.clipboards: list[object] = []
+        self.outputs: list[object] = []
         self.escape_focus_target = state.focus_target
         self.next_focus_target = state.focus_target
 
@@ -69,9 +71,10 @@ class FakeController:
         self.calls.append("focus_next_region")
         self.state.focus_target = self.next_focus_target
 
-    def copy_result_to_clipboard(self, clipboard: object) -> None:
+    def copy_result_to_clipboard(self, clipboard: object, output: object | None = None) -> None:
         self.calls.append("copy_result_to_clipboard")
         self.clipboards.append(clipboard)
+        self.outputs.append(output)
 
 
 def test_build_key_bindings_registers_expected_shortcuts_and_q_filter() -> None:
@@ -131,7 +134,8 @@ def test_build_key_bindings_modal_focus_and_clipboard_bindings_drive_controller(
     output_window = object()
     modal_window = object()
     clipboard = object()
-    app = FakeApp(clipboard=clipboard)
+    output = object()
+    app = FakeApp(clipboard=clipboard, output=output)
     bindings = build_key_bindings(
         state=state,
         controller=controller,
@@ -160,6 +164,7 @@ def test_build_key_bindings_modal_focus_and_clipboard_bindings_drive_controller(
     ]
     assert app.layout.focused == [modal_window, output_window, input_window]
     assert controller.clipboards == [clipboard]
+    assert controller.outputs == [output]
 
 
 def test_build_key_bindings_exit_shortcuts_exit_application() -> None:
